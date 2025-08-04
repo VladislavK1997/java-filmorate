@@ -28,7 +28,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            throw new NoSuchElementException("Ошибка. Пользователь не найден");
+            throw new NoSuchElementException("Пользователь не найден");
         }
         users.put(user.getId(), user);
         log.info("Обновлён пользователь: {}", user);

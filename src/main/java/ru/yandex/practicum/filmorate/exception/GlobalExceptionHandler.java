@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleUserNotFound(ValidationException ex) {
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFound(NoSuchElementException ex) {
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "404",
