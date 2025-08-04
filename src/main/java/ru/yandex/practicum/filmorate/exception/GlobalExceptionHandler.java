@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleOtherExceptions(Exception ex) {
         return new ResponseEntity<>(Map.of(
                 "timestamp", LocalDateTime.now().toString(),
-                "status", "500",
-                "error", "Internal Server Error",
+                "status", "404",
+                "error", "Not Found",
                 "message", ex.getMessage()
         ), HttpStatus.INTERNAL_SERVER_ERROR);
     }
