@@ -43,6 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleOtherExceptions(Exception ex) {
+        ex.printStackTrace();
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "500",
