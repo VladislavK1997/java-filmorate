@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "404",
-                "error", "Not Found",
+                "error", "Not Found",  
                 "message", ex.getMessage()
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
@@ -51,3 +51,4 @@ public class GlobalExceptionHandler {
         ), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
