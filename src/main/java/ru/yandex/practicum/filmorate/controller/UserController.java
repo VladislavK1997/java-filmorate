@@ -30,6 +30,9 @@ public class UserController {
         if (!users.containsKey(user.getId())) {
             throw new NoSuchElementException("Пользователь не найден");
         }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         users.put(user.getId(), user);
         log.info("Обновлён пользователь: {}", user);
         return user;
@@ -40,3 +43,4 @@ public class UserController {
         return users.values();
     }
 }
+
