@@ -46,8 +46,8 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
-                "status", "500",
-                "error", "Internal Server Error",
+                "status", "400",
+                "error", "Not Found",
                 "message", ex.getMessage()
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
