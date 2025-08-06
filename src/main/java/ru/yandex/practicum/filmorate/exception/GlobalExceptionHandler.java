@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.exception;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,15 +9,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
-@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        log.warn("Ошибка валидации: {}", ex.getMessage());
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .findFirst()
@@ -33,12 +29,23 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(NoSuchElementException ex) {
+    @ExceptionHandler(FilmNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleFilmNotFound(FilmNotFoundException ex) {
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "404",
-                "error", "Not Found",
+                "error", "Film Not Found",
+                "message", ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException ex) {
+        Map<String, String> error = Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", "404",
+                "error", "User Not Found",
                 "message", ex.getMessage()
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
@@ -46,14 +53,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleOtherExceptions(Exception ex) {
-        ex.printStackTrace();
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
-                "status", "400",
-                "error", "Not Found",
+                "status", "500",
+                "error", "Internal Server Error",
                 "message", ex.getMessage()
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
 
