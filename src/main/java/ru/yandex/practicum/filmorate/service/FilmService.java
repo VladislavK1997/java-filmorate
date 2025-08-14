@@ -73,5 +73,4 @@ public class FilmService {
     public boolean exists(int id) {
         return getById(id) != null;
     }
-
 }
