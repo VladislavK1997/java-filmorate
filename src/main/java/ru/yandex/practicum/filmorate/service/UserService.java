@@ -1,106 +1,93 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
-@Slf4j
 @Service
 public class UserService {
 
-    private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final Map<Integer, User> users = new HashMap<>();
+    private int nextId = 1;
 
     public User create(User user) {
-        if (!StringUtils.hasText(user.getName())) {
-            user.setName(user.getLogin());
+        user.setId(nextId++);
+        if (user.getFriends() == null) {
+            user.setFriends(new HashSet<>());
         }
-        if (!StringUtils.hasText(user.getLogin()) || user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может быть пустым или содержать пробелы");
-        }
-        return userStorage.create(user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     public User update(User user) {
-        User existed = getById(user.getId());
-        if (!StringUtils.hasText(user.getName())) {
-            user.setName(user.getLogin());
+        if (!exists(user.getId())) {
+            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
-        User updated = userStorage.update(user);
-        log.info("Обновлён пользователь: {}", updated);
-        return updated;
+        User existing = users.get(user.getId());
+        existing.setName(user.getName());
+        existing.setEmail(user.getEmail());
+        existing.setLogin(user.getLogin());
+        existing.setBirthday(user.getBirthday());
+        return existing;
+    }
+
+    public Collection<User> getAll() {
+        return users.values();
     }
 
     public User getById(int id) {
-        return userStorage.getById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден: id=" + id));
-    }
-
-    public List<User> getAll() {
-        return userStorage.getAll().stream().toList();
-    }
-
-    public void addFriend(int id, int friendId) {
-        if (id == friendId) {
-            throw new ValidationException("Нельзя добавить в друзья самого себя");
+        if (!exists(id)) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
-        User u1 = getById(id);
-        User u2 = getById(friendId);
-
-        u1.getFriends().add(friendId);
-        u2.getFriends().add(id);
-
-        userStorage.update(u1);
-        userStorage.update(u2);
-
-        log.info("Пользователи {} и {} стали друзьями", id, friendId);
-    }
-
-    public void removeFriend(int id, int friendId) {
-        User u1 = getById(id);
-        User u2 = getById(friendId);
-
-        u1.getFriends().remove(friendId);
-        u2.getFriends().remove(id);
-
-        userStorage.update(u1);
-        userStorage.update(u2);
-
-        log.info("Пользователи {} и {} больше не друзья", id, friendId);
-    }
-
-    public List<User> getFriends(int id) {
-        User user = getById(id);
-        return user.getFriends().stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
-    }
-
-    public List<User> getCommonFriends(int id, int otherId) {
-        User u1 = getById(id);
-        User u2 = getById(otherId);
-        Set<Integer> common = u1.getFriends().stream()
-                .filter(u2.getFriends()::contains)
-                .collect(Collectors.toSet());
-        return common.stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
+        return users.get(id);
     }
 
     public boolean exists(int id) {
-        return userStorage.getById(id).isPresent();
+        return users.containsKey(id);
+    }
+
+    public void addFriend(int userId, int friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+    }
+
+    public boolean removeFriend(int userId, int friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+
+        if (!user.getFriends().contains(friendId)) {
+            return false;
+        }
+
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+        return true;
+    }
+
+    public List<User> getFriends(int userId) {
+        User user = getById(userId);
+        List<User> friends = new ArrayList<>();
+        for (Integer friendId : user.getFriends()) {
+            friends.add(getById(friendId));
+        }
+        return friends;
+    }
+
+    public List<User> getCommonFriends(int userId, int otherId) {
+        User user = getById(userId);
+        User other = getById(otherId);
+
+        Set<Integer> commonIds = new HashSet<>(user.getFriends());
+        commonIds.retainAll(other.getFriends());
+
+        List<User> commonFriends = new ArrayList<>();
+        for (Integer id : commonIds) {
+            commonFriends.add(getById(id));
+        }
+        return commonFriends;
     }
 }

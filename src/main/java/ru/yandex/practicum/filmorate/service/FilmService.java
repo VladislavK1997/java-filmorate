@@ -31,7 +31,9 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        getById(film.getId());
+        if (!exists(film.getId())) {
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
+        }
         Film updated = filmStorage.update(film);
         log.info("Обновлён фильм: {}", updated);
         return updated;
@@ -48,19 +50,26 @@ public class FilmService {
 
     public void addLike(int filmId, int userId) {
         Film film = getById(filmId);
-        userStorage.getById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден: id=" + userId));
+        if (!userStorage.getById(userId).isPresent()) {
+            throw new NotFoundException("Пользователь не найден: id=" + userId);
+        }
 
         film.getLikes().add(userId);
         filmStorage.update(film);
         log.info("Пользователь {} лайкнул фильм {}", userId, filmId);
     }
 
-    public void removeLike(int filmId, int userId) {
+    public boolean removeLike(int filmId, int userId) {
         Film film = getById(filmId);
+
+        if (!film.getLikes().contains(userId)) {
+            return false;
+        }
+
         film.getLikes().remove(userId);
         filmStorage.update(film);
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
+        return true;
     }
 
     public List<Film> getPopular(int count) {
