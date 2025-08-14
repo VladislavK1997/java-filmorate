@@ -1,59 +1,36 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    private final Map<Long, User> users = new HashMap<>();
+    private long nextId = 1;
+
+    @GetMapping
+    public Collection<User> getAll() {
+        return users.values();
     }
 
     @PostMapping
-    public User add(@RequestBody User user) {
-        return userService.add(user);
+    public User create(@Valid @RequestBody User user) {
+        user.setId(nextId++);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @PutMapping
-    public User update(@RequestBody User user) {
-        return userService.update(user);
-    }
-
-    @GetMapping("/{id}")
-    public User get(@PathVariable Long id) {
-        return userService.get(id);
-    }
-
-    @GetMapping
-    public List<User> getAll() {
-        return userService.getAll();
-    }
-
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addFriend(id, friendId);
-    }
-
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.removeFriend(id, friendId);
-    }
-
-    @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable Long id) {
-        return userService.getFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return userService.getCommonFriends(id, otherId);
+    public User update(@Valid @RequestBody User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new NoSuchElementException("Пользователь не найден");
+        }
+        users.put(user.getId(), user);
+        return user;
     }
 }

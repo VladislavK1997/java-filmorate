@@ -1,16 +1,27 @@
 package ru.yandex.practicum.filmorate.model;
 
-import org.springframework.util.StringUtils;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Film {
     private Long id;
+
+    @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
+
     private String description;
+
+    @PastOrPresent(message = "Дата релиза не может быть в будущем")
     private LocalDate releaseDate;
+
+    @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration; // в минутах
+
     private Set<Long> likes = new HashSet<>();
 
     public Film() {
@@ -73,25 +84,5 @@ public class Film {
 
     public void removeLike(Long userId) {
         likes.remove(userId);
-    }
-
-    public boolean isValid() {
-        if (!StringUtils.hasText(this.name)) {
-            return false;
-        }
-
-        if (this.description != null && this.description.length() > 200) {
-            return false;
-        }
-
-        if (this.releaseDate != null && this.releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
-            return false;
-        }
-
-        if (this.duration <= 0) {
-            return false;
-        }
-
-        return true;
     }
 }
