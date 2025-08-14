@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Component
@@ -23,6 +24,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
+        if (!films.containsKey(film.getId())) {
+            throw new NoSuchElementException("Фильм " + film.getId() + " не найден");
+        }
         films.put(film.getId(), film);
         return film;
     }
@@ -37,3 +41,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.values();
     }
 }
+

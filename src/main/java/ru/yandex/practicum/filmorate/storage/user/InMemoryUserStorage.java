@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Component
@@ -23,6 +24,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new NoSuchElementException("Пользователь " + user.getId() + " не найден");
+        }
         users.put(user.getId(), user);
         return user;
     }
@@ -37,3 +41,4 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values();
     }
 }
+
