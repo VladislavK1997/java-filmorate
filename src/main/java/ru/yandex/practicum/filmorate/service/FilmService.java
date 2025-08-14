@@ -17,7 +17,6 @@ public class FilmService {
     private final Map<Integer, Film> films = new HashMap<>();
     private final Map<Integer, Set<Integer>> likes = new HashMap<>(); // filmId -> userId
     private int nextId = 1;
-
     private final LocalDate EARLIEST_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
