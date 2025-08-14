@@ -7,8 +7,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +34,18 @@ public class GlobalExceptionHandler {
 
         log.warn("Validation failed: {}", messages);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ValidationException.class, ConstraintViolationException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> handleCustomValidation(RuntimeException ex) {
+        Map<String, String> error = Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", "400",
+                "error", "Bad Request",
+                "message", ex.getMessage()
+        );
+        log.warn("Bad request: {}", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)
