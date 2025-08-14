@@ -31,4 +31,3 @@ public class Film {
 
     private Set<Integer> likes = new HashSet<>();
 }
-
