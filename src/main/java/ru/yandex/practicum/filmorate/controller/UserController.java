@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -29,6 +30,9 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
+        if (!userService.exists(user.getId())) {
+            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
+        }
         return userService.update(user);
     }
 
@@ -39,26 +43,42 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getById(@PathVariable int id) {
-        return userService.getById(id);
+        User user = userService.getById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
+        return user;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        if (!userService.exists(id) || !userService.exists(friendId)) {
+            throw new NotFoundException("Пользователь или друг не найден");
+        }
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+        if (!userService.exists(id) || !userService.exists(friendId)) {
+            throw new NotFoundException("Пользователь или друг не найден");
+        }
         userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable int id) {
+        if (!userService.exists(id)) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        if (!userService.exists(id) || !userService.exists(otherId)) {
+            throw new NotFoundException("Пользователь или друг не найден");
+        }
         return userService.getCommonFriends(id, otherId);
     }
 }

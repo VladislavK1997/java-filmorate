@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +15,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/films")
-@Validated
 public class FilmController {
 
     private final FilmService filmService;
@@ -39,7 +36,7 @@ public class FilmController {
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         if (!filmService.exists(film.getId())) {
-            throw new NotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         validateReleaseDate(film);
         Film updatedFilm = filmService.update(film);
@@ -56,18 +53,24 @@ public class FilmController {
     public Film getById(@PathVariable int id) {
         Film film = filmService.getById(id);
         if (film == null) {
-            throw new NotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         return film;
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
+        if (!filmService.exists(id)) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable int id, @PathVariable int userId) {
+        if (!filmService.exists(id)) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
         filmService.removeLike(id, userId);
     }
 
@@ -78,7 +81,7 @@ public class FilmController {
 
     private void validateReleaseDate(Film film) {
         if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
+            throw new IllegalArgumentException("Дата релиза не может быть раньше 28.12.1895");
         }
     }
 }

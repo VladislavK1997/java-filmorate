@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +36,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ValidationException.class, ConstraintViolationException.class, IllegalArgumentException.class})
-    public ResponseEntity<Map<String, String>> handleCustomValidation(RuntimeException ex) {
+    @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
+    public ResponseEntity<Map<String, String>> handleValidation(RuntimeException ex) {
         Map<String, String> error = Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "400",
                 "error", "Bad Request",
-                "status", "404",
-                "error", "Film Not Found",
                 "message", ex.getMessage()
         );
         log.warn("Bad request: {}", ex.getMessage());
@@ -56,7 +54,6 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "404",
                 "error", "Not Found",
-                "error", "User Not Found",
                 "message", ex.getMessage()
         );
         log.warn("Not found: {}", ex.getMessage());
