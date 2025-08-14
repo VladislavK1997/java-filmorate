@@ -98,6 +98,7 @@ public class UserService {
                 .map(this::getById)
                 .collect(Collectors.toList());
     }
+    
     public boolean exists(int id) {
         return getById(id) != null;
     }
