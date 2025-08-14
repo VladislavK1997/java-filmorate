@@ -9,41 +9,68 @@ import java.util.Set;
 
 @Data
 public class User {
+    private Integer id;
 
-    private int id;
-
-    @Email(message = "Некорректный email")
-    @NotBlank(message = "Email не может быть пустым")
-    private String email;
-
-    @NotBlank(message = "Логин не может быть пустым")
-    @Pattern(regexp = "\\S+", message = "Логин не может содержать пробелы")
+    @NotBlank
     private String login;
 
+    @NotBlank
+    @Size(max = 50)
     private String name;
 
-    @Past(message = "Дата рождения должна быть в прошлом")
-    @NotNull(message = "Дата рождения не может быть пустой")
-    private LocalDate birthday;
+    @Email
+    private String email;
 
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
+
+    public User() {
+    }
+
+    public User(Integer id, String login, String name, String email) {
+        this.id = id;
+        this.login = login;
+        this.name = name;
+        this.email = email;
+        this.friends = new HashSet<>();
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public Set<Integer> getFriends() {
         return friends;
     }
 
     public void setFriends(Set<Integer> friends) {
-        this.friends.clear();
-        if (friends != null) {
-            this.friends.addAll(friends);
-        }
-    }
-
-    public void addFriend(int friendId) {
-        friends.add(friendId);
-    }
-
-    public void removeFriend(int friendId) {
-        friends.remove(friendId);
+        this.friends = friends;
     }
 }

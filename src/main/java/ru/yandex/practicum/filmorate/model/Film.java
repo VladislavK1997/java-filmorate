@@ -9,32 +9,68 @@ import java.util.Set;
 
 @Data
 public class Film {
+    private Integer id;
 
-    private int id;
-
-    @NotBlank(message = "Название фильма не может быть пустым")
+    @NotBlank
     private String name;
 
-    @Size(max = 200, message = "Описание не должно превышать 200 символов")
+    @Size(max = 200)
     private String description;
 
-    @NotNull(message = "Дата релиза не может быть пустой")
+    @PastOrPresent
     private LocalDate releaseDate;
 
-    @Positive(message = "Продолжительность должна быть положительной")
+    @Positive
     private int duration;
 
-    private final Set<Integer> likes = new HashSet<>();
-
-    public Set<Integer> getLikes() {
-        return likes;
+    public Film() {
     }
 
-    public void addLike(int userId) {
-        likes.add(userId);
+    public Film(Integer id, String name, String description, LocalDate releaseDate, int duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
     }
 
-    public void removeLike(int userId) {
-        likes.remove(userId);
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(LocalDate releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

@@ -1,69 +1,63 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+
+
+
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 public class UserController {
 
-    private final UserStorage userStorage;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return userStorage.create(user);
+    public User create(@RequestBody User user) {
+        return userService.create(user);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        if (!userStorage.existsById(user.getId())) {
-            throw new NoSuchElementException("Пользователь не найден");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return userStorage.update(user);
-    }
-
-    @GetMapping
-    public Collection<User> getAll() {
-        return userStorage.getAll();
-    }
-
-    @GetMapping("/{id}")
-    public User getById(@PathVariable int id) {
-        return userStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
+    public User update(@RequestBody User user) {
+        return userService.update(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        User user = userStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
-        User friend = userStorage.getById(friendId)
-                .orElseThrow(() -> new NoSuchElementException("Друг не найден"));
-        user.addFriend(friendId);
-        friend.addFriend(id);
+    @ResponseStatus(HttpStatus.OK)
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
-        User user = userStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
-        User friend = userStorage.getById(friendId)
-                .orElseThrow(() -> new NoSuchElementException("Друг не найден"));
-        user.removeFriend(friendId);
-        friend.removeFriend(id);
+    @ResponseStatus(HttpStatus.OK)
+    public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Integer id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNotFound(NotFoundException e) {
+        return e.getMessage();
     }
 }
 

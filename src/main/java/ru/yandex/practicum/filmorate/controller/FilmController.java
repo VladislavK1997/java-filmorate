@@ -2,56 +2,47 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/films")
-@RequiredArgsConstructor
 public class FilmController {
 
-    private final FilmStorage filmStorage;
+    private final FilmService filmService;
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film film) {
-        return filmStorage.create(film);
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if (!filmStorage.existsById(film.getId())) {
-            throw new NoSuchElementException("Фильм не найден");
-        }
-        return filmStorage.update(film);
+        return filmService.update(film);
     }
 
-    @GetMapping
-    public Collection<Film> getAll() {
-        return filmStorage.getAll();
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getPopular(count);
     }
 
-    @GetMapping("/{id}")
-    public Film getById(@PathVariable int id) {
-        return filmStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
-    }
-
-    @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable int id, @PathVariable int userId) {
-        Film film = filmStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
-        film.addLike(userId);
-    }
-
-    @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable int id, @PathVariable int userId) {
-        Film film = filmStorage.getById(id)
-                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
-        film.removeLike(userId);
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleValidation(ValidationException e) {
+        return e.getMessage();
     }
 }
 

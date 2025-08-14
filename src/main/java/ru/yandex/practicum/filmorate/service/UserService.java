@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -14,80 +15,61 @@ public class UserService {
 
     public User create(User user) {
         user.setId(nextId++);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
         users.put(user.getId(), user);
         return user;
     }
 
     public User update(User user) {
-        if (!exists(user.getId())) {
-            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
+        checkExists(user.getId());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
-        User existing = users.get(user.getId());
-        existing.setName(user.getName());
-        existing.setEmail(user.getEmail());
-        existing.setLogin(user.getLogin());
-        existing.setBirthday(user.getBirthday());
-        return existing;
+        users.put(user.getId(), user);
+        return user;
     }
 
-    public Collection<User> getAll() {
-        return users.values();
+    public void addFriend(int id, int friendId) {
+        checkExists(id);
+        checkExists(friendId);
+        users.get(id).getFriends().add(friendId);
+        users.get(friendId).getFriends().add(id); // взаимная дружба
     }
 
-    public User getById(int id) {
-        if (!exists(id)) {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
+    public void removeFriend(int id, int friendId) {
+        checkExists(id);
+        checkExists(friendId);
+        users.get(id).getFriends().remove(friendId);
+        users.get(friendId).getFriends().remove(id);
+    }
+
+    public List<User> getFriends(int id) {
+        checkExists(id);
+        return users.get(id).getFriends().stream()
+                .map(this::getUser)
+                .collect(Collectors.toList());
+    }
+
+    public List<User> getCommonFriends(int id, int otherId) {
+        checkExists(id);
+        checkExists(otherId);
+        Set<Integer> friends1 = users.get(id).getFriends();
+        Set<Integer> friends2 = users.get(otherId).getFriends();
+        return friends1.stream()
+                .filter(friends2::contains)
+                .map(this::getUser)
+                .collect(Collectors.toList());
+    }
+
+    private void checkExists(int id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
+    }
+
+    private User getUser(int id) {
         return users.get(id);
-    }
-
-    public boolean exists(int id) {
-        return users.containsKey(id);
-    }
-
-    public void addFriend(int userId, int friendId) {
-        User user = getById(userId);
-        User friend = getById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-    }
-
-    public boolean removeFriend(int userId, int friendId) {
-        User user = getById(userId);
-        User friend = getById(friendId);
-
-        if (!user.getFriends().contains(friendId)) {
-            return false;
-        }
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-        return true;
-    }
-
-    public List<User> getFriends(int userId) {
-        User user = getById(userId);
-        List<User> friends = new ArrayList<>();
-        for (Integer friendId : user.getFriends()) {
-            friends.add(getById(friendId));
-        }
-        return friends;
-    }
-
-    public List<User> getCommonFriends(int userId, int otherId) {
-        User user = getById(userId);
-        User other = getById(otherId);
-
-        Set<Integer> commonIds = new HashSet<>(user.getFriends());
-        commonIds.retainAll(other.getFriends());
-
-        List<User> commonFriends = new ArrayList<>();
-        for (Integer id : commonIds) {
-            commonFriends.add(getById(id));
-        }
-        return commonFriends;
     }
 }
