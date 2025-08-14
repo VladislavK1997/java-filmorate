@@ -70,4 +70,8 @@ public class FilmService {
                 .limit(count)
                 .toList();
     }
+    public boolean exists(int id) {
+        return getById(id) != null;
+    }
+
 }

@@ -42,6 +42,8 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "400",
                 "error", "Bad Request",
+                "status", "404",
+                "error", "Film Not Found",
                 "message", ex.getMessage()
         );
         log.warn("Bad request: {}", ex.getMessage());
@@ -54,6 +56,7 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString(),
                 "status", "404",
                 "error", "Not Found",
+                "error", "User Not Found",
                 "message", ex.getMessage()
         );
         log.warn("Not found: {}", ex.getMessage());
