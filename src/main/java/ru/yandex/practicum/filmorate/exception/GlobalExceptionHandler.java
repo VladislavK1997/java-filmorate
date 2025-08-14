@@ -71,4 +71,16 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
+        Map<String, String> error = Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", "400",
+                "error", "Bad Request",
+                "message", ex.getMessage()
+        );
+        log.warn("Validation failed: {}", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 }

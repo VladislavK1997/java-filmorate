@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -27,10 +28,10 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        validateReleaseDate(film);
-        Film createdFilm = filmService.create(film);
-        log.info("Добавлен фильм: {}", createdFilm);
-        return createdFilm;
+        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
+        }
+        return filmService.create(film);
     }
 
     @PutMapping
@@ -38,11 +39,12 @@ public class FilmController {
         if (!filmService.exists(film.getId())) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
-        validateReleaseDate(film);
-        Film updatedFilm = filmService.update(film);
-        log.info("Обновлен фильм: {}", updatedFilm);
-        return updatedFilm;
+        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
+        }
+        return filmService.update(film);
     }
+
 
     @GetMapping
     public Collection<Film> getAll() {

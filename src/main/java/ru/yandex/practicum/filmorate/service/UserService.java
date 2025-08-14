@@ -28,9 +28,10 @@ public class UserService {
         if (!StringUtils.hasText(user.getName())) {
             user.setName(user.getLogin());
         }
-        User created = userStorage.create(user);
-        log.info("Создан пользователь: {}", created);
-        return created;
+        if (!StringUtils.hasText(user.getLogin()) || user.getLogin().contains(" ")) {
+            throw new ValidationException("Логин не может быть пустым или содержать пробелы");
+        }
+        return userStorage.create(user);
     }
 
     public User update(User user) {
@@ -100,7 +101,6 @@ public class UserService {
     }
 
     public boolean exists(int id) {
-        return getById(id) != null;
+        return userStorage.getById(id).isPresent();
     }
-
 }
