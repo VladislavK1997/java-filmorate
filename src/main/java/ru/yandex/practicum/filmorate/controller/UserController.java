@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-
-
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/users")
@@ -60,7 +57,3 @@ public class UserController {
         return e.getMessage();
     }
 }
-
-
-
-
