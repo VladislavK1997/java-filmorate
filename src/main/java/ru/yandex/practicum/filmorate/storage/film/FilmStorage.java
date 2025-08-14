@@ -8,7 +8,9 @@ import java.util.Optional;
 public interface FilmStorage {
     Film create(Film film);
     Film update(Film film);
+
     Optional<Film> getById(int id);
+    
     Collection<Film> getAll();
 
     default boolean existsById(int id) {
