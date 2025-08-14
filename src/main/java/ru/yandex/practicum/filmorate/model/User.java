@@ -24,10 +24,8 @@ public class User {
     @NotNull(message = "Дата рождения не может быть пустой")
     private LocalDate birthday;
 
-    // Список друзей (ID пользователей)
     private Set<Integer> friends = new HashSet<>();
 
-    // ======= Геттеры и сеттеры =======
     public int getId() {
         return id;
     }

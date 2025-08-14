@@ -1,86 +1,41 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        return userService.create(user);
-    }
-
-    @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        if (!userService.exists(user.getId())) {
-            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
-        }
-        return userService.update(user);
-    }
+    private final UserStorage userStorage;
 
     @GetMapping
     public Collection<User> getAll() {
-        return userService.getAll();
+        return userStorage.getAll();
     }
 
     @GetMapping("/{id}")
     public User getById(@PathVariable int id) {
-        return userService.getById(id);
+        return userStorage.getById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (!userService.exists(id) || !userService.exists(friendId)) {
-            throw new NotFoundException("Пользователь с id " + id + " или друг с id " + friendId + " не найден");
-        }
-        userService.addFriend(id, friendId);
+    @PostMapping
+    public User create(@RequestBody User user) {
+        return userStorage.create(user);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (!userService.exists(id) || !userService.exists(friendId)) {
-            throw new NotFoundException("Пользователь с id " + id + " или друг с id " + friendId + " не найден");
-        }
-
-        boolean removed = userService.removeFriend(id, friendId);
-        if (!removed) {
-            throw new NotFoundException("Связь между пользователем " + id + " и другом " + friendId + " не найдена");
-        }
-    }
-
-    @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable int id) {
-        if (!userService.exists(id)) {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return userService.getFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        if (!userService.exists(id) || !userService.exists(otherId)) {
-            throw new NotFoundException("Пользователь с id " + id + " или пользователь с id " + otherId + " не найден");
-        }
-        return userService.getCommonFriends(id, otherId);
+    @PutMapping
+    public User update(@RequestBody User user) {
+        return userStorage.update(user);
     }
 }
+
 
 
