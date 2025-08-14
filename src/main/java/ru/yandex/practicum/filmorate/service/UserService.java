@@ -69,6 +69,3 @@ public class UserService {
         return common.stream().map(this::get).collect(Collectors.toList());
     }
 }
-
-
-

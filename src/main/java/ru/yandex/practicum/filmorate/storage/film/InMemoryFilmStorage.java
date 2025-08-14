@@ -45,5 +45,3 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.containsKey(id);
     }
 }
-
-

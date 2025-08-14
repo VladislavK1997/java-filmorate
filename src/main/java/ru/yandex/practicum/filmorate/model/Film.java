@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,6 +74,24 @@ public class Film {
     public void removeLike(Long userId) {
         likes.remove(userId);
     }
+
+    public boolean isValid() {
+        if (!StringUtils.hasText(this.name)) {
+            return false;
+        }
+
+        if (this.description != null && this.description.length() > 200) {
+            return false;
+        }
+
+        if (this.releaseDate != null && this.releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
+            return false;
+        }
+
+        if (this.duration <= 0) {
+            return false;
+        }
+
+        return true;
+    }
 }
-
-
