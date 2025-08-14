@@ -6,9 +6,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-/**
- * Film.
- */
 @Getter
 @Setter
 public class Film {
@@ -26,5 +23,5 @@ public class Film {
 
     @Positive(message = "Продолжительность должна быть положительной")
     private int duration;
-
 }
+
