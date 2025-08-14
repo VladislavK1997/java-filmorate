@@ -1,86 +1,30 @@
 package ru.yandex.practicum.filmorate.exception;
 
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
+import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
-@Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, String> messages = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        err -> err.getField(),
-                        err -> err.getDefaultMessage(),
-                        (a, b) -> a + "; " + b
-                ));
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", "400");
-        body.put("error", "Validation failed");
-        body.put("messages", messages);
-
-        log.warn("Validation failed: {}", messages);
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationException(Exception ex) {
+        return Map.of("error", "Ошибка валидации", "message", ex.getMessage());
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
-    public ResponseEntity<Map<String, String>> handleValidation(RuntimeException ex) {
-        Map<String, String> error = Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", "400",
-                "error", "Bad Request",
-                "message", ex.getMessage()
-        );
-        log.warn("Bad request: {}", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(NotFoundException ex) {
-        Map<String, String> error = Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", "404",
-                "error", "Not Found",
-                "message", ex.getMessage()
-        );
-        log.warn("Not found: {}", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFoundException(NoSuchElementException ex) {
+        return Map.of("error", "Не найдено", "message", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleOtherExceptions(Exception ex) {
-        log.error("Internal server error", ex);
-        Map<String, String> error = Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", "500",
-                "error", "Internal Server Error",
-                "message", ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
-        Map<String, String> error = Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", "400",
-                "error", "Bad Request",
-                "message", ex.getMessage()
-        );
-        log.warn("Validation failed: {}", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleOtherExceptions(Exception ex) {
+        return Map.of("error", "Внутренняя ошибка сервера", "message", ex.getMessage());
     }
 }

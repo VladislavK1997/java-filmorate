@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/films")
@@ -14,6 +15,19 @@ import java.util.Collection;
 public class FilmController {
 
     private final FilmStorage filmStorage;
+
+    @PostMapping
+    public Film create(@Valid @RequestBody Film film) {
+        return filmStorage.create(film);
+    }
+
+    @PutMapping
+    public Film update(@Valid @RequestBody Film film) {
+        if (!filmStorage.existsById(film.getId())) {
+            throw new NoSuchElementException("Фильм не найден");
+        }
+        return filmStorage.update(film);
+    }
 
     @GetMapping
     public Collection<Film> getAll() {
@@ -23,17 +37,22 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getById(@PathVariable int id) {
         return filmStorage.getById(id)
-                .orElseThrow(() -> new NotFoundException("Фильм с id " + id + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
     }
 
-    @PostMapping
-    public Film create(@RequestBody Film film) {
-        return filmStorage.create(film);
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        Film film = filmStorage.getById(id)
+                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
+        film.addLike(userId);
     }
 
-    @PutMapping
-    public Film update(@RequestBody Film film) {
-        return filmStorage.update(film);
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable int id, @PathVariable int userId) {
+        Film film = filmStorage.getById(id)
+                .orElseThrow(() -> new NoSuchElementException("Фильм не найден"));
+        film.removeLike(userId);
     }
 }
+
 
