@@ -28,9 +28,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
-        }
+        validateReleaseDate(film);
         return filmService.create(film);
     }
 
@@ -39,12 +37,9 @@ public class FilmController {
         if (!filmService.exists(film.getId())) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
-        }
+        validateReleaseDate(film);
         return filmService.update(film);
     }
-
 
     @GetMapping
     public Collection<Film> getAll() {
@@ -53,37 +48,27 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getById(@PathVariable int id) {
-        Film film = filmService.getById(id);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id " + id + " не найден");
-        }
-        return film;
+        return filmService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
-        if (!filmService.exists(id)) {
-            throw new NotFoundException("Фильм с id " + id + " не найден");
-        }
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable int id, @PathVariable int userId) {
-        if (!filmService.exists(id)) {
-            throw new NotFoundException("Фильм с id " + id + " не найден");
-        }
         filmService.removeLike(id, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") int count) {
+    public List<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
         return filmService.getPopular(count);
     }
 
     private void validateReleaseDate(Film film) {
         if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new IllegalArgumentException("Дата релиза не может быть раньше 28.12.1895");
+            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
         }
     }
 }
