@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final Map<Integer, Film> films = new HashMap<>();
-    private final Map<Integer, Set<Integer>> likes = new HashMap<>(); // filmId -> userId
+    private final Map<Integer, Set<Integer>> likes = new HashMap<>();
     private int nextId = 1;
-    private final LocalDate EARLIEST_DATE = LocalDate.of(1895, 12, 28);
+
+    private static final LocalDate EARLIEST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
         validate(film);
@@ -41,6 +42,16 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public void addLike(int filmId, int userId) {
+        checkExists(filmId);
+        likes.get(filmId).add(userId);
+    }
+
+    public void removeLike(int filmId, int userId) {
+        checkExists(filmId);
+        likes.get(filmId).remove(userId);
+    }
+
     private void validate(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Название фильма не может быть пустым");
@@ -48,7 +59,7 @@ public class FilmService {
         if (film.getDescription() != null && film.getDescription().length() > 200) {
             throw new ValidationException("Длина описания не более 200 символов");
         }
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(EARLIEST_DATE)) {
+        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(EARLIEST_FILM_DATE)) {
             throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
         }
         if (film.getDuration() <= 0) {
@@ -61,14 +72,5 @@ public class FilmService {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
     }
-
-    public void addLike(int filmId, int userId) {
-        checkExists(filmId);
-        likes.get(filmId).add(userId);
-    }
-
-    public void removeLike(int filmId, int userId) {
-        checkExists(filmId);
-        likes.get(filmId).remove(userId);
-    }
 }
+
