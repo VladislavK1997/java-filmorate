@@ -1,75 +1,74 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    private final UserStorage userStorage;
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int nextId = 1;
+    @Autowired
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
-    public User create(User user) {
-        user.setId(nextId++);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        return user;
+    public User add(User user) {
+        return userStorage.add(user);
     }
 
     public User update(User user) {
-        checkExists(user.getId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
+        return userStorage.update(user);
+    }
+
+    public User get(Long id) {
+        User user = userStorage.get(id);
+        if (user == null) throw new NotFoundException("User not found");
         return user;
     }
 
-    public void addFriend(int id, int friendId) {
-        checkExists(id);
-        checkExists(friendId);
-        users.get(id).getFriends().add(friendId);
-        users.get(friendId).getFriends().add(id); // взаимная дружба
+    public List<User> getAll() {
+        return userStorage.getAll();
     }
 
-    public void removeFriend(int id, int friendId) {
-        checkExists(id);
-        checkExists(friendId);
-        users.get(id).getFriends().remove(friendId);
-        users.get(friendId).getFriends().remove(id);
+    public void addFriend(Long userId, Long friendId) {
+        User user = get(userId);
+        User friend = get(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+        userStorage.update(user);
+        userStorage.update(friend);
     }
 
-    public List<User> getFriends(int id) {
-        checkExists(id);
-        return users.get(id).getFriends().stream()
-                .map(this::getUser)
+    public void removeFriend(Long userId, Long friendId) {
+        User user = get(userId);
+        User friend = get(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+        userStorage.update(user);
+        userStorage.update(friend);
+    }
+
+    public List<User> getFriends(Long userId) {
+        User user = get(userId);
+        return user.getFriends().stream()
+                .map(this::get)
                 .collect(Collectors.toList());
     }
 
-    public List<User> getCommonFriends(int id, int otherId) {
-        checkExists(id);
-        checkExists(otherId);
-        Set<Integer> friends1 = users.get(id).getFriends();
-        Set<Integer> friends2 = users.get(otherId).getFriends();
-        return friends1.stream()
-                .filter(friends2::contains)
-                .map(this::getUser)
-                .collect(Collectors.toList());
-    }
-
-    private void checkExists(int id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-    }
-
-    private User getUser(int id) {
-        return users.get(id);
+    public List<User> getCommonFriends(Long userId, Long otherId) {
+        User user1 = get(userId);
+        User user2 = get(otherId);
+        Set<Long> common = new HashSet<>(user1.getFriends());
+        common.retainAll(user2.getFriends());
+        return common.stream().map(this::get).collect(Collectors.toList());
     }
 }
+
+
+

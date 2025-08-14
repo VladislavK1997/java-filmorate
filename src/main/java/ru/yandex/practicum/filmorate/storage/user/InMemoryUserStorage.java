@@ -1,44 +1,35 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-
-    private final Map<Integer, User> users = new HashMap<>();
-    private int currentId = 1;
+    private final Map<Long, User> users = new HashMap<>();
+    private long idCounter = 1L;
 
     @Override
-    public User create(User user) {
-        user.setId(currentId++);
+    public User add(User user) {
+        user.setId(idCounter++);
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public User update(User user) {
-        if (!existsById(user.getId())) {
-            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
-        }
         users.put(user.getId(), user);
         return user;
     }
 
-
     @Override
-    public Optional<User> getById(int id) {
-        return Optional.ofNullable(users.get(id));
+    public User get(Long id) {
+        return users.get(id);
     }
 
     @Override
-    public Collection<User> getAll() {
-        return users.values();
+    public List<User> getAll() {
+        return new ArrayList<>(users.values());
     }
 }
