@@ -31,7 +31,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        getById(film.getId()); // проверка существования
+        getById(film.getId());
         Film updated = filmStorage.update(film);
         log.info("Обновлён фильм: {}", updated);
         return updated;
@@ -48,7 +48,6 @@ public class FilmService {
 
     public void addLike(int filmId, int userId) {
         Film film = getById(filmId);
-        // валидация наличия пользователя
         userStorage.getById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: id=" + userId));
 
