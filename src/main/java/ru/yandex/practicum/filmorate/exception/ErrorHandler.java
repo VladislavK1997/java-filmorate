@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 import java.util.Objects;
+
 @SuppressWarnings("unused")
 @RestControllerAdvice
 public class ErrorHandler {
