@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserService userService;
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
+        this.userService = userService;
     }
 
     public Film addFilm(Film film) {
@@ -68,6 +70,7 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmOrThrow(filmId);
+        userService.getUser(userId); // Проверка существования пользователя
         log.info("Добавление лайка фильму ID {} от пользователя ID {}", filmId, userId);
         film.getLikes().add(userId);
         filmStorage.updateFilm(film);
@@ -76,14 +79,14 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmOrThrow(filmId);
+        userService.getUser(userId); // Проверка существования пользователя
         log.info("Удаление лайка фильму ID {} от пользователя ID {}", filmId, userId);
 
-        if (!film.getLikes().contains(userId)) {
+        if (!film.getLikes().remove(userId)) {
             log.warn("Лайк от пользователя ID {} не найден у фильма ID {}", userId, filmId);
             throw new NotFoundException("Лайк от пользователя с id=" + userId + " не найден");
         }
 
-        film.getLikes().remove(userId);
         filmStorage.updateFilm(film);
         log.info("Лайк успешно удален");
     }

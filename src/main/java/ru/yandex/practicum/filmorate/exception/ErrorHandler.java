@@ -18,12 +18,12 @@ public class ErrorHandler {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(final NotFoundException e) {
+    public Map<String, String> handleNotFoundException(NotFoundException e) {
         return Map.of(
-                "error", "Объект не найден",
-                "errorMessage", e.getMessage()
+                "error", "Не найдено",
+                "message", e.getMessage()
         );
     }
 
