@@ -54,6 +54,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public boolean exists(Long id) {
         return films.containsKey(id);
     }
+
     @Override
     public void addLike(Long filmId, Long userId) {
         Film film = getById(filmId);
