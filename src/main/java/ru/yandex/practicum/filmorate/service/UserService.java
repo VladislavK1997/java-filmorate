@@ -38,15 +38,18 @@ public class UserService {
         return user;
     }
 
-    private void validateUser(User user) {
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Login cannot be empty or contain spaces");
-        }
+    public void validateUser(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             throw new ValidationException("Email is invalid");
         }
-        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Birthday cannot be in the future");
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw new ValidationException("Login is invalid");
+        }
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Birthday must be in the past");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
     }
 
