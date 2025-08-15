@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -33,7 +34,8 @@ public class UserService {
     }
 
     public User getUser(Long id) {
-        return userStorage.getUser(id);
+        return userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
     }
 
     public List<User> getAllUsers() {
@@ -41,41 +43,34 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        User user = userStorage.getUser(userId);
-        User friend = userStorage.getUser(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        User user = getUser(userId);
+        User friend = getUser(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        User user = userStorage.getUser(userId);
-        User friend = userStorage.getUser(friendId);
+        User user = getUser(userId);
+        User friend = getUser(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
     }
 
     public List<User> getFriends(Long userId) {
-        User user = userStorage.getUser(userId);
-        List<User> friends = new ArrayList<>();
-        for (Long friendId : user.getFriends()) {
-            friends.add(userStorage.getUser(friendId));
-        }
-        return friends;
+        User user = getUser(userId);
+        return user.getFriends().stream()
+                .map(this::getUser)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-        Set<Long> userFriends = userStorage.getUser(userId).getFriends();
-        Set<Long> otherFriends = userStorage.getUser(otherId).getFriends();
-        Set<Long> commonIds = new HashSet<>(userFriends);
-        commonIds.retainAll(otherFriends);
-        List<User> commonFriends = new ArrayList<>();
-        for (Long id : commonIds) {
-            commonFriends.add(userStorage.getUser(id));
-        }
-        return commonFriends;
+        Set<Long> userFriends = getUser(userId).getFriends();
+        Set<Long> otherFriends = getUser(otherId).getFriends();
+
+        return userFriends.stream()
+                .filter(otherFriends::contains)
+                .map(this::getUser)
+                .collect(Collectors.toList());
     }
 }
 

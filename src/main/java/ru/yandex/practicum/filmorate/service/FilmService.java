@@ -45,17 +45,15 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.getFilm(filmId);
-        if (film.isEmpty()) {
-            throw new NotFoundException("Фильм не найден");
-        }
-        film.get().getLikes().add(userId);
+        Film film = filmStorage.getFilm(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + filmId + " не найден"));
+        film.getLikes().add(userId);
     }
 
-
     public void removeLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.getFilm(filmId);
-        film.get().getLikes().remove(userId);
+        Film film = filmStorage.getFilm(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + filmId + " не найден"));
+        film.getLikes().remove(userId);
     }
 
     public List<Film> getPopularFilms(int count) {

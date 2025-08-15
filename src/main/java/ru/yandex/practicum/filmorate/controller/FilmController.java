@@ -3,11 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @SuppressWarnings("unused")
 @RestController
@@ -36,8 +37,9 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Film> getFilm(@PathVariable Long id) {
-        return filmService.getFilm(id);
+    public Film getFilm(@PathVariable Long id) {
+        return filmService.getFilm(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
     }
 
     @GetMapping

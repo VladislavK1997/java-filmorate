@@ -12,6 +12,12 @@ public class InMemoryUserStorage implements UserStorage {
     private Long idCounter = 1L;
 
     @Override
+    public Optional<User> getUser(Long id) {
+        return Optional.ofNullable(users.get(id));  // Возвращаем Optional
+    }
+
+    // Остальные методы остаются без изменений
+    @Override
     public User addUser(User user) {
         user.setId(idCounter++);
         users.put(user.getId(), user);
@@ -27,11 +33,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void deleteUser(Long id) {
         users.remove(id);
-    }
-
-    @Override
-    public User getUser(Long id) {
-        return users.get(id);
     }
 
     @Override
