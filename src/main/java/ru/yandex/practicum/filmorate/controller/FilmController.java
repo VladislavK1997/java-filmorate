@@ -37,6 +37,7 @@ public class FilmController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
@@ -74,4 +75,3 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 }
-

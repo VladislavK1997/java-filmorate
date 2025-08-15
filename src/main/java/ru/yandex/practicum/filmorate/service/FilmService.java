@@ -74,4 +74,3 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
     }
 }
-
