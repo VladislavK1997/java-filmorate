@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,17 +16,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @SpringBootTest
 class FilmorateApplicationTests {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
     @Test
     void shouldNotAllowEmptyName() {
-        Film film = new Film();
-        film.setName("");
-        film.setDescription("Тест");
-        film.setReleaseDate(LocalDate.of(2000, 1, 1));
-        film.setDuration(90);
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = factory.getValidator();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty());
+            Film film = new Film();
+            film.setName("");
+            film.setDescription("Тест");
+            film.setReleaseDate(LocalDate.of(2000, 1, 1));
+            film.setDuration(90);
+
+            Set<ConstraintViolation<Film>> violations = validator.validate(film);
+            assertFalse(violations.isEmpty(), "Фильм с пустым названием должен вызывать ошибки валидации");
+        }
     }
 }
