@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/users")
@@ -18,7 +18,6 @@ public class UserController {
 
     private final UserService userService;
 
-    // Проверка существования пользователя
     private void checkUserExists(long id) {
         if (!userService.exists(id)) {
             throw new UserNotFoundException("User with id " + id + " not found");
@@ -60,7 +59,7 @@ public class UserController {
             throw new ValidationException("Birthday cannot be in the future");
         }
         if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin()); // default name = login
+            user.setName(user.getLogin());
         }
     }
 }
