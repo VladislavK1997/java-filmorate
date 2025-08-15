@@ -22,10 +22,13 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        validateFilm(film);
         return filmStorage.addFilm(film);
     }
-
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
+    }
     public Film updateFilm(Film film) {
         getFilmOrThrow(film.getId());
         validateFilm(film);
@@ -66,12 +69,6 @@ public class FilmService {
     private Film getFilmOrThrow(Long id) {
         return filmStorage.getFilm(id)
                 .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
-    }
-
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-        }
     }
 }
 

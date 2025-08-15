@@ -29,16 +29,16 @@ public class Film {
     @NotNull(message = "Дата релиза не может быть пустой")
     private LocalDate releaseDate;
 
+    public void setReleaseDate(LocalDate releaseDate) {
+        LocalDate firstFilmEver = LocalDate.of(1895, 12, 28);
+        if (releaseDate.isBefore(firstFilmEver)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
+        this.releaseDate = releaseDate;
+    }
+
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
 
     private Set<Long> likes = new HashSet<>();
-
-    public void setReleaseDate(LocalDate releaseDate) {
-        LocalDate firstFilmEver = LocalDate.of(1895, 12, 28);
-        if (releaseDate.isBefore(firstFilmEver)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
-        }
-        this.releaseDate = releaseDate;
     }
-}
