@@ -44,4 +44,9 @@ public class UserService {
         }
         userStorage.remove(id);
     }
+
+    public boolean exists(Long id) {
+        return userStorage.exists(id);
+    }
 }
+

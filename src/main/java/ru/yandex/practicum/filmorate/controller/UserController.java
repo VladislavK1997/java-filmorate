@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -17,13 +20,16 @@ public class UserController {
     }
 
     @PostMapping
-    public User add(@RequestBody User user) {
-        return userService.add(user);
+    public ResponseEntity<User> create(@Valid @RequestBody User user) {
+        return ResponseEntity.ok(userService.add(user));
     }
 
     @PutMapping
-    public User update(@RequestBody User user) {
-        return userService.update(user);
+    public ResponseEntity<User> update(@Valid @RequestBody User user) {
+        if (!userService.exists(user.getId())) {
+            throw new UserNotFoundException("User not found");
+        }
+        return ResponseEntity.ok(userService.update(user));
     }
 
     @GetMapping("/{id}")
