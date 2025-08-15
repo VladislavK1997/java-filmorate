@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 @SuppressWarnings("unused")
