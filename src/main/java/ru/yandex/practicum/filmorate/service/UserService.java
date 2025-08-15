@@ -21,6 +21,7 @@ public class UserService {
     public User add(User user) {
         return storage.add(user);
     }
+
     public User createUser(User user) {
         validateUser(user);
         user.setId(idCounter++);
