@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -49,6 +50,41 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public boolean exists(Long id) {
         return users.containsKey(id);
+    }
+
+    @Override
+    public void addFriend(Long userId, Long friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+    }
+
+    @Override
+    public void removeFriend(Long userId, Long friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+    }
+
+    @Override
+    public List<User> getFriends(Long userId) {
+        User user = getById(userId);
+        return user.getFriends().stream()
+                .map(this::getById)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getCommonFriends(Long userId, Long otherId) {
+        User user = getById(userId);
+        User otherUser = getById(otherId);
+
+        return user.getFriends().stream()
+                .filter(otherUser.getFriends()::contains)
+                .map(this::getById)
+                .collect(Collectors.toList());
     }
 }
 

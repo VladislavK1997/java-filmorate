@@ -16,4 +16,10 @@ public interface FilmStorage {
     void remove(Long id);
 
     boolean exists(Long id);
+
+    void addLike(Long filmId, Long userId);
+
+    void removeLike(Long filmId, Long userId);
+
+    List<Film> getPopularFilms(int count);
 }

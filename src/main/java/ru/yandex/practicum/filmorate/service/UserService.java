@@ -48,6 +48,22 @@ public class UserService {
     public boolean exists(Long id) {
         return userStorage.exists(id);
     }
+
+    public void addFriend(Long userId, Long friendId) {
+        userStorage.addFriend(userId, friendId);
+    }
+
+    public void removeFriend(Long userId, Long friendId) {
+        userStorage.removeFriend(userId, friendId);
+    }
+
+    public List<User> getFriends(Long userId) {
+        return userStorage.getFriends(userId);
+    }
+
+    public List<User> getCommonFriends(Long userId, Long otherId) {
+        return userStorage.getCommonFriends(userId, otherId);
+    }
 }
 
 
