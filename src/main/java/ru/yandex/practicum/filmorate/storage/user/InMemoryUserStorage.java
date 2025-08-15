@@ -13,10 +13,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getUser(Long id) {
-        return Optional.ofNullable(users.get(id));  // Возвращаем Optional
+        return Optional.ofNullable(users.get(id));
     }
 
-    // Остальные методы остаются без изменений
     @Override
     public User addUser(User user) {
         user.setId(idCounter++);
