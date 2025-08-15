@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,12 +22,13 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        validateReleaseDate(film);
+        validateFilm(film);
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        validateReleaseDate(film);
+        getFilmOrThrow(film.getId());
+        validateFilm(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -36,8 +36,8 @@ public class FilmService {
         filmStorage.deleteFilm(id);
     }
 
-    public Optional<Film> getFilm(Long id) {
-        return filmStorage.getFilm(id);
+    public Film getFilm(Long id) {
+        return getFilmOrThrow(id);
     }
 
     public List<Film> getAllFilms() {
@@ -45,15 +45,15 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilm(filmId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id=" + filmId + " не найден"));
+        Film film = getFilmOrThrow(filmId);
         film.getLikes().add(userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilm(filmId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id=" + filmId + " не найден"));
-        film.getLikes().remove(userId);
+        Film film = getFilmOrThrow(filmId);
+        if (!film.getLikes().remove(userId)) {
+            throw new NotFoundException("Лайк от пользователя с id=" + userId + " не найден");
+        }
     }
 
     public List<Film> getPopularFilms(int count) {
@@ -63,9 +63,14 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    private void validateReleaseDate(Film film) {
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
-            throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
+    private Film getFilmOrThrow(Long id) {
+        return filmStorage.getFilm(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }
 }
