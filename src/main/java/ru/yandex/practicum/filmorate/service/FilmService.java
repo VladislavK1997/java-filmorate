@@ -44,6 +44,8 @@ public class FilmService {
         }
         filmStorage.remove(id);
     }
+
+    public boolean exists(Long id) {
+        return filmStorage.exists(id);
+    }
 }
-
-

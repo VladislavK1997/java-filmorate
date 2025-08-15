@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -19,31 +16,29 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        return ResponseEntity.ok(userService.add(user));
-    }
-
-    @PutMapping
-    public ResponseEntity<User> update(@Valid @RequestBody User user) {
-        if (!userService.exists(user.getId())) {
-            throw new UserNotFoundException("User not found");
-        }
-        return ResponseEntity.ok(userService.update(user));
-    }
-
-    @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
-    }
-
     @GetMapping
-    public List<User> getAll() {
+    public List<User> getAllUsers() {
         return userService.getAll();
     }
 
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.getById(id);
+    }
+
+    @PostMapping
+    public User addUser(@RequestBody User user) {
+        return userService.add(user);
+    }
+
+    @PutMapping
+    public User updateUser(@RequestBody User user) {
+        return userService.update(user);
+    }
+
     @DeleteMapping("/{id}")
-    public void remove(@PathVariable Long id) {
+    public void removeUser(@PathVariable Long id) {
         userService.remove(id);
     }
 }
+

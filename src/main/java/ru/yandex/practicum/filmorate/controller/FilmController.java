@@ -16,28 +16,29 @@ public class FilmController {
         this.filmService = filmService;
     }
 
+    @GetMapping
+    public List<Film> getAllFilms() {
+        return filmService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable Long id) {
+        return filmService.getById(id);
+    }
+
     @PostMapping
-    public Film add(@RequestBody Film film) {
+    public Film addFilm(@RequestBody Film film) {
         return filmService.add(film);
     }
 
     @PutMapping
-    public Film update(@RequestBody Film film) {
+    public Film updateFilm(@RequestBody Film film) {
         return filmService.update(film);
     }
 
-    @GetMapping("/{id}")
-    public Film getById(@PathVariable Long id) {
-        return filmService.getById(id);
-    }
-
-    @GetMapping
-    public List<Film> getAll() {
-        return filmService.getAll();
-    }
-
     @DeleteMapping("/{id}")
-    public void remove(@PathVariable Long id) {
+    public void removeFilm(@PathVariable Long id) {
         filmService.remove(id);
     }
 }
+
