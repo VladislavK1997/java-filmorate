@@ -32,12 +32,21 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        Film existingFilm = getFilmOrThrow(film.getId());
+        getFilmOrThrow(film.getId());
         validateFilm(film);
         log.info("Обновление фильма с ID: {}", film.getId());
         Film updatedFilm = filmStorage.updateFilm(film);
         log.info("Фильм с ID {} успешно обновлен", film.getId());
         return updatedFilm;
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate() == null) {
+            throw new ValidationException("Дата релиза не может быть пустой");
+        }
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
     }
 
     public void deleteFilm(Long id) {
@@ -79,36 +88,16 @@ public class FilmService {
     public List<Film> getPopularFilms(int count) {
         log.info("Получение {} самых популярных фильмов", count);
         if (count <= 0) {
-            log.warn("Запрошено некорректное количество фильмов: {}", count);
             throw new ValidationException("Количество фильмов должно быть положительным");
         }
-
         return filmStorage.getAllFilms().stream()
                 .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate() == null) {
-            log.error("Дата релиза не указана");
-            throw new ValidationException("Дата релиза не может быть пустой");
-        }
-        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
-            log.error("Некорректная дата релиза: {}", film.getReleaseDate());
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-        }
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Название фильма не указано");
-            throw new ValidationException("Название фильма не может быть пустым");
-        }
-    }
-
     private Film getFilmOrThrow(Long id) {
         return filmStorage.getFilm(id)
-                .orElseThrow(() -> {
-                    log.warn("Фильм с ID {} не найден", id);
-                    return new NotFoundException("Фильм с id=" + id + " не найден");
-                });
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
     }
 }

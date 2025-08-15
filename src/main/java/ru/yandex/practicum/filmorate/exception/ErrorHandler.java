@@ -1,45 +1,37 @@
 package ru.yandex.practicum.filmorate.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
-import java.util.stream.Collectors;
-
+import java.util.Objects;
 @SuppressWarnings("unused")
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        FieldError::getField,
-                        fieldError -> fieldError.getDefaultMessage() != null
-                                ? fieldError.getDefaultMessage()
-                                : "Ошибка валидации"
-                ));
+    public Map<String, String> handleValidationException(final ValidationException e) {
+        return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NotFoundException e) {
+    public Map<String, String> handleNotFoundException(final NotFoundException e) {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(ValidationException e) {
-        return Map.of("error", e.getMessage());
+    public Map<String, String> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+        return Map.of("error", Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleGeneralException(Exception e) {
+    public Map<String, String> handleThrowable(final Throwable e) {
         return Map.of("error", "Произошла непредвиденная ошибка");
     }
 }
