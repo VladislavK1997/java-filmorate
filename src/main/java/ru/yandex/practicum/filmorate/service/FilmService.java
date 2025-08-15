@@ -77,10 +77,13 @@ public class FilmService {
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmOrThrow(filmId);
         log.info("Удаление лайка фильму ID {} от пользователя ID {}", filmId, userId);
-        if (!film.getLikes().remove(userId)) {
+
+        if (!film.getLikes().contains(userId)) {
             log.warn("Лайк от пользователя ID {} не найден у фильма ID {}", userId, filmId);
             throw new NotFoundException("Лайк от пользователя с id=" + userId + " не найден");
         }
+
+        film.getLikes().remove(userId);
         filmStorage.updateFilm(film);
         log.info("Лайк успешно удален");
     }

@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -59,8 +62,17 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен запрос на удаление лайка фильму ID {} от пользователя ID {}", id, userId);
-        filmService.removeLike(id, userId);
+        try {
+            log.info("Получен запрос на удаление лайка фильму ID {} от пользователя ID {}", id, userId);
+            filmService.removeLike(id, userId);
+        } catch (NotFoundException e) {
+            log.error("Ошибка при удалении лайка: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage(),
+                    e
+            );
+        }
     }
 
     @GetMapping("/popular")
