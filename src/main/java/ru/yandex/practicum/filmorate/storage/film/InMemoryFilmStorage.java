@@ -12,6 +12,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Long idCounter = 1L;
 
     @Override
+    public Optional<Film> getFilm(Long id) {
+        return Optional.ofNullable(films.get(id));
+    }
+
+    @Override
     public Film addFilm(Film film) {
         film.setId(idCounter++);
         films.put(film.getId(), film);
@@ -27,11 +32,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void deleteFilm(Long id) {
         films.remove(id);
-    }
-
-    @Override
-    public Film getFilm(Long id) {
-        return films.get(id);
     }
 
     @Override

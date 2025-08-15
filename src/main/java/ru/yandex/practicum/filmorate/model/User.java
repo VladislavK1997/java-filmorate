@@ -23,7 +23,16 @@ public class User {
 
     private String name;
 
+    @Past(message = "День рождения должен быть в прошлом")
     private LocalDate birthday;
 
     private Set<Long> friends = new HashSet<>();
+
+    public void setName(String name) {
+        if (name == null || name.isBlank()) {
+            this.name = this.login;
+        } else {
+            this.name = name;
+        }
+    }
 }
