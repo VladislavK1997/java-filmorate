@@ -1,66 +1,47 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
-import java.util.Collection;
+import javax.validation.Valid;
+import java.util.List;
 
-
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
 
-    private void checkUserExists(long id) {
-        if (!userService.exists(id)) {
-            throw new UserNotFoundException("User with id " + id + " not found");
-        }
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
-        validateUser(user);
-        return userService.add(user);
+    public User addUser(@Valid @RequestBody User user) {
+        return userService.addUser(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User user) {
-        checkUserExists(user.getId());
-        validateUser(user);
-        return userService.update(user);
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.updateUser(user);
     }
 
-    @GetMapping
-    public Collection<User> getAll() {
-        return userService.getAll();
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable long id) {
-        checkUserExists(id);
-        return userService.getById(id);
+    public User getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
-    private void validateUser(User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            throw new ValidationException("Email is invalid");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Login is invalid");
-        }
-        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Birthday cannot be in the future");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -74,13 +55,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable Long id) {
+    public List<User> getFriends(@PathVariable Long id) {
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getCommonFriends(
-            @PathVariable Long id, @PathVariable Long otherId) {
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 }
