@@ -7,35 +7,30 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
-import java.util.Objects;
 
-@SuppressWarnings("unused")
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(final ValidationException e) {
+    public Map<String, String> handleValidationException(ValidationException e) {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundException(NotFoundException e) {
-        return Map.of(
-                "error", "Не найдено",
-                "message", e.getMessage()
-        );
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        return Map.of("error", Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
+    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return Map.of("error", e.getFieldError().getDefaultMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleThrowable(final Throwable e) {
+    public Map<String, String> handleThrowable(Throwable e) {
         return Map.of("error", "Произошла непредвиденная ошибка");
     }
 }

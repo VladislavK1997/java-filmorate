@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,18 +26,19 @@ public class FilmService {
 
     public Film addFilm(Film film) {
         validateFilm(film);
-        log.info("Добавление нового фильма: {}", film.getName());
         Film createdFilm = filmStorage.addFilm(film);
-        log.info("Фильм успешно добавлен с ID: {}", createdFilm.getId());
+        log.info("Добавлен новый фильм с ID: {}", createdFilm.getId());
         return createdFilm;
     }
 
     public Film updateFilm(Film film) {
-        getFilmOrThrow(film.getId());
+        if (!filmStorage.exists(film.getId())) {
+            log.warn("Фильм с ID {} не найден", film.getId());
+            throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
+        }
         validateFilm(film);
-        log.info("Обновление фильма с ID: {}", film.getId());
         Film updatedFilm = filmStorage.updateFilm(film);
-        log.info("Фильм с ID {} успешно обновлен", film.getId());
+        log.info("Обновлен фильм с ID: {}", film.getId());
         return updatedFilm;
     }
 
@@ -52,58 +52,64 @@ public class FilmService {
     }
 
     public void deleteFilm(Long id) {
-        getFilmOrThrow(id);
-        log.info("Удаление фильма с ID: {}", id);
+        if (!filmStorage.exists(id)) {
+            log.warn("Попытка удаления несуществующего фильма с ID: {}", id);
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
+        }
         filmStorage.deleteFilm(id);
-        log.info("Фильм с ID {} успешно удален", id);
+        log.info("Удален фильм с ID: {}", id);
     }
 
     public Film getFilm(Long id) {
-        log.info("Получение фильма с ID: {}", id);
-        return getFilmOrThrow(id);
+        Film film = filmStorage.getFilm(id)
+                .orElseThrow(() -> {
+                    log.warn("Запрошен несуществующий фильм с ID: {}", id);
+                    return new NotFoundException("Фильм с id=" + id + " не найден");
+                });
+        log.info("Запрошен фильм с ID: {}", id);
+        return film;
     }
 
     public List<Film> getAllFilms() {
-        log.info("Получение списка всех фильмов");
+        log.info("Запрошен список всех фильмов");
         return filmStorage.getAllFilms();
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = getFilmOrThrow(filmId);
-        userService.getUser(userId); // Проверка существования пользователя
-        log.info("Добавление лайка фильму ID {} от пользователя ID {}", filmId, userId);
-        film.getLikes().add(userId);
-        filmStorage.updateFilm(film);
-        log.info("Лайк успешно добавлен");
+        if (!filmStorage.exists(filmId)) {
+            log.warn("Попытка добавить лайк несуществующему фильму с ID: {}", filmId);
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (!userService.exists(userId)) {
+            log.warn("Попытка добавить лайк от несуществующего пользователя с ID: {}", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        filmStorage.addLike(filmId, userId);
+        log.info("Добавлен лайк фильму {} от пользователя {}", filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Film film = getFilmOrThrow(filmId);
-        userService.getUser(userId); // Проверка существования пользователя
-        log.info("Удаление лайка фильму ID {} от пользователя ID {}", filmId, userId);
-
-        if (!film.getLikes().remove(userId)) {
-            log.warn("Лайк от пользователя ID {} не найден у фильма ID {}", userId, filmId);
+        if (!filmStorage.exists(filmId)) {
+            log.warn("Попытка удалить лайк у несуществующего фильма с ID: {}", filmId);
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (!userService.exists(userId)) {
+            log.warn("Попытка удалить лайк несуществующего пользователя с ID: {}", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        if (!filmStorage.removeLike(filmId, userId)) {
+            log.warn("Попытка удалить несуществующий лайк от пользователя {} фильму {}", userId, filmId);
             throw new NotFoundException("Лайк от пользователя с id=" + userId + " не найден");
         }
-
-        filmStorage.updateFilm(film);
-        log.info("Лайк успешно удален");
+        log.info("Удален лайк фильму {} от пользователя {}", filmId, userId);
     }
 
     public List<Film> getPopularFilms(int count) {
-        log.info("Получение {} самых популярных фильмов", count);
         if (count <= 0) {
+            log.warn("Запрошено некорректное количество популярных фильмов: {}", count);
             throw new ValidationException("Количество фильмов должно быть положительным");
         }
-        return filmStorage.getAllFilms().stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
-    }
-
-    private Film getFilmOrThrow(Long id) {
-        return filmStorage.getFilm(id)
-                .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
+        log.info("Запрошены {} самых популярных фильмов", count);
+        return filmStorage.getPopularFilms(count);
     }
 }
