@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -27,7 +29,12 @@ public class User {
     @Past(message = "День рождения должен быть в прошлом")
     private LocalDate birthday;
 
-    private Set<Long> friends = new HashSet<>();
+    private Map<Long, FriendshipStatus> friends = new HashMap<>();
+
+    public enum FriendshipStatus {
+        PENDING,
+        CONFIRMED
+    }
 
     public void setName(String name) {
         if (name == null || name.isBlank()) {
