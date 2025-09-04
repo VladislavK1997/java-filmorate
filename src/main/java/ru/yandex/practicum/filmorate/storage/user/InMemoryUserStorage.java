@@ -47,7 +47,6 @@ public class InMemoryUserStorage implements UserStorage {
     public void addFriend(Long userId, Long friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-        
         user.getFriends().put(friendId, User.FriendshipStatus.PENDING);
         friend.getFriends().put(userId, User.FriendshipStatus.PENDING);
     }
@@ -56,7 +55,6 @@ public class InMemoryUserStorage implements UserStorage {
     public void confirmFriend(Long userId, Long friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-
         user.getFriends().put(friendId, User.FriendshipStatus.CONFIRMED);
         friend.getFriends().put(userId, User.FriendshipStatus.CONFIRMED);
     }
@@ -65,7 +63,6 @@ public class InMemoryUserStorage implements UserStorage {
     public void removeFriend(Long userId, Long friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
     }
