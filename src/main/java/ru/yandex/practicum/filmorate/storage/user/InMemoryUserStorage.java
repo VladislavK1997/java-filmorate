@@ -47,16 +47,8 @@ public class InMemoryUserStorage implements UserStorage {
     public void addFriend(Long userId, Long friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-        user.getFriends().put(friendId, User.FriendshipStatus.PENDING);
-        friend.getFriends().put(userId, User.FriendshipStatus.PENDING);
-    }
-
-    @Override
-    public void confirmFriend(Long userId, Long friendId) {
-        User user = users.get(userId);
-        User friend = users.get(friendId);
-        user.getFriends().put(friendId, User.FriendshipStatus.CONFIRMED);
-        friend.getFriends().put(userId, User.FriendshipStatus.CONFIRMED);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
     }
 
     @Override
@@ -74,39 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
             return Collections.emptyList();
         }
 
-        return user.getFriends().keySet().stream()
-                .map(this::getUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> getConfirmedFriends(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            return Collections.emptyList();
-        }
-
-        return user.getFriends().entrySet().stream()
-                .filter(entry -> entry.getValue() == User.FriendshipStatus.CONFIRMED)
-                .map(Map.Entry::getKey)
-                .map(this::getUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> getPendingFriends(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            return Collections.emptyList();
-        }
-
-        return user.getFriends().entrySet().stream()
-                .filter(entry -> entry.getValue() == User.FriendshipStatus.PENDING)
-                .map(Map.Entry::getKey)
+        return user.getFriends().stream()
                 .map(this::getUser)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -122,18 +82,8 @@ public class InMemoryUserStorage implements UserStorage {
             return Collections.emptyList();
         }
 
-        Set<Long> user1Friends = user1.getFriends().entrySet().stream()
-                .filter(entry -> entry.getValue() == User.FriendshipStatus.CONFIRMED)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-
-        Set<Long> user2Friends = user2.getFriends().entrySet().stream()
-                .filter(entry -> entry.getValue() == User.FriendshipStatus.CONFIRMED)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-
-        Set<Long> commonFriendIds = new HashSet<>(user1Friends);
-        commonFriendIds.retainAll(user2Friends);
+        Set<Long> commonFriendIds = new HashSet<>(user1.getFriends());
+        commonFriendIds.retainAll(user2.getFriends());
 
         return commonFriendIds.stream()
                 .map(this::getUser)
