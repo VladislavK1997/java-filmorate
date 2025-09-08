@@ -10,19 +10,4 @@ import lombok.NoArgsConstructor;
 public class Genre {
     private Long id;
     private String name;
-
-    public enum FilmGenre {
-        COMEDY("Комедия"),
-        DRAMA("Драма"),
-        CARTOON("Мультфильм"),
-        THRILLER("Триллер"),
-        DOCUMENTARY("Документальный"),
-        ACTION("Боевик");
-
-        private final String name;
-
-        FilmGenre(String name) {
-            this.name = name;
-        }
-    }
 }
