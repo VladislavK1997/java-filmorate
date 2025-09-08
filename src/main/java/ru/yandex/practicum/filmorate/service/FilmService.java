@@ -30,8 +30,6 @@ public class FilmService {
         validateMpa(film.getMpa().getId());
         return filmStorage.addFilm(film);
     }
-
-
     
     public Film updateFilm(Film film) {
         getFilmOrThrow(film.getId());
