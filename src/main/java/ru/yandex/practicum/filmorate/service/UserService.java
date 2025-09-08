@@ -2,19 +2,16 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
     public User addUser(User user) {
@@ -25,17 +22,20 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        getUserOrThrow(user.getId());
+        getUserOrThrow(user.getId()); // Используем get для проверки
         return userStorage.updateUser(user);
     }
 
     public void deleteUser(Long id) {
-        getUserOrThrow(id);
+        if (!userStorage.exists(id)) {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
+        }
         userStorage.deleteUser(id);
     }
 
     public User getUser(Long id) {
-        return getUserOrThrow(id);
+        return userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
     }
 
     public List<User> getAllUsers() {
@@ -43,25 +43,25 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        getUserOrThrow(userId);
-        getUserOrThrow(friendId);
+        getUserOrThrow(userId);    // Используем get для проверки
+        getUserOrThrow(friendId);  // Используем get для проверки
         userStorage.addFriend(userId, friendId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        getUserOrThrow(userId);
-        getUserOrThrow(friendId);
+        getUserOrThrow(userId);    // Используем get для проверки
+        getUserOrThrow(friendId);  // Используем get для проверки
         userStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getFriends(Long id) {
-        getUserOrThrow(id);
+        getUserOrThrow(id); // Используем get для проверки
         return userStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(Long id, Long otherId) {
-        getUserOrThrow(id);
-        getUserOrThrow(otherId);
+        getUserOrThrow(id);      // Используем get для проверки
+        getUserOrThrow(otherId); // Используем get для проверки
         return userStorage.getCommonFriends(id, otherId);
     }
 
