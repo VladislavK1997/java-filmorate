@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -22,11 +25,13 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     public Film addFilm(Film film) {
         validateFilm(film);
         validateMpa(film.getMpa().getId());
+        validateGenres(film.getGenres());
         return filmStorage.addFilm(film);
     }
 
@@ -34,6 +39,7 @@ public class FilmService {
         getFilmOrThrow(film.getId());
         validateFilm(film);
         validateMpa(film.getMpa().getId());
+        validateGenres(film.getGenres());
         return filmStorage.updateFilm(film);
     }
 
@@ -49,6 +55,16 @@ public class FilmService {
     private void validateMpa(Long mpaId) {
         if (!mpaStorage.exists(mpaId)) {
             throw new NotFoundException("Рейтинг MPA с id=" + mpaId + " не найден");
+        }
+    }
+
+    private void validateGenres(Set<Genre> genres) {
+        if (genres != null) {
+            for (Genre genre : genres) {
+                if (!genreStorage.exists(genre.getId())) {
+                    throw new NotFoundException("Жанр с id=" + genre.getId() + " не найден");
+                }
+            }
         }
     }
 
