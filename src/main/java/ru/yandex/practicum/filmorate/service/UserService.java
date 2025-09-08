@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
 import java.util.List;
 
 @Slf4j
@@ -22,7 +23,7 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        getUserOrThrow(user.getId()); // Используем get для проверки
+        getUserOrThrow(user.getId());
         return userStorage.updateUser(user);
     }
 
@@ -43,25 +44,25 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        getUserOrThrow(userId);    // Используем get для проверки
-        getUserOrThrow(friendId);  // Используем get для проверки
+        getUserOrThrow(userId);
+        getUserOrThrow(friendId);
         userStorage.addFriend(userId, friendId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        getUserOrThrow(userId);    // Используем get для проверки
-        getUserOrThrow(friendId);  // Используем get для проверки
+        getUserOrThrow(userId);
+        getUserOrThrow(friendId);
         userStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getFriends(Long id) {
-        getUserOrThrow(id); // Используем get для проверки
+        getUserOrThrow(id);
         return userStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(Long id, Long otherId) {
-        getUserOrThrow(id);      // Используем get для проверки
-        getUserOrThrow(otherId); // Используем get для проверки
+        getUserOrThrow(id);
+        getUserOrThrow(otherId);
         return userStorage.getCommonFriends(id, otherId);
     }
 
