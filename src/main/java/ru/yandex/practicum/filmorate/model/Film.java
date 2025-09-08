@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +26,7 @@ public class Film {
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
-    private int duration;
+    private Integer duration;
 
     private MpaRating mpa;
     private Set<Genre> genres = new HashSet<>();

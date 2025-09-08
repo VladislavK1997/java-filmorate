@@ -20,7 +20,7 @@ public interface FilmStorage {
 
     void addLike(Long filmId, Long userId);
 
-    boolean removeLike(Long filmId, Long userId);
+    boolean removeLike(Long filmId, Long userId); // Изменен возвращаемый тип на boolean
 
     List<Film> getPopularFilms(int count);
 }
