@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -30,7 +29,7 @@ public class FilmService {
         validateMpa(film.getMpa().getId());
         return filmStorage.addFilm(film);
     }
-    
+
     public Film updateFilm(Film film) {
         getFilmOrThrow(film.getId());
         validateFilm(film);
